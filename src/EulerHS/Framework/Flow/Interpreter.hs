@@ -282,6 +282,16 @@ interpretFlowMethod _ _ (L.GenerateGUID next) = do
 interpretFlowMethod _ _ (L.RunSysCmd cmd next) =
   next <$> readCreateProcess (shell cmd) ""
 
+interpretFlowMethod _ _ (L.ResolveDNS host next) = do
+  pure $ next (Map.lookup host dnsDatabase)
+  where
+    dnsDatabase :: DNS
+    dnsDatabase = Map.fromList
+        [ ("example.com", "93.184.216.34")
+        , ("google.com", "8.8.8.8")
+        , ("openai.com", "104.18.25.24")
+        ]
+
 ----------------------------------------------------------------------
 interpretFlowMethod mbFlowGuid rt (L.Fork _desc _newFlowGUID flow next) = do
   awaitableMVar <- newEmptyMVar
